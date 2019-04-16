@@ -1,0 +1,30 @@
+apiVersion: skaffold/v1beta2
+kind: Config
+build:
+  artifacts:
+  - image: changeme
+    context: .
+    docker: {}
+  tagPolicy:
+    envTemplate:
+      template: '{{.DOCKER_REGISTRY}}/techsadhu/cbworkshop:{{.VERSION}}'
+  local: {}
+deploy:
+  kubectl: {}
+profiles:
+- name: dev
+  build:
+    artifacts:
+    - docker: {}
+    tagPolicy:
+      envTemplate:
+        template: '{{.DOCKER_REGISTRY}}/techsadhu/cbworkshop:{{.DIGEST_HEX}}'
+    local: {}
+  deploy:
+    helm:
+      releases:
+      - name: cbworkshop
+        chartPath: charts/cbworkshop
+        setValueTemplates:
+          image.repository: '{{.DOCKER_REGISTRY}}/techsadhu/cbworkshop'
+          image.tag: '{{.DIGEST_HEX}}'
